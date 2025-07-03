@@ -1,83 +1,290 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>コードギャラリー (Julia & C)</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-  <script>hljs.highlightAll();</script>
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 800px;
-      margin: 2em auto;
-      padding: 0 1em;
-      line-height: 1.6;
-    }
-    h1 {
-      text-align: center;
-    }
-    pre {
-      background: #f5f5f5;
-      padding: 1em;
-      overflow-x: auto;
-      border-radius: 5px;
-    }
-    .card {
-      margin-bottom: 2em;
-      padding: 1em;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      background: #fff;
-    }
-    .lang-tag {
-      font-size: 0.9em;
-      color: #666;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>コードギャラリー (Julia & C)</title>
+    <link rel="stylesheet" href="/vs2015.css">
+    <script src="/jl.js"></script>
+    <!-- and it's easy to individually load additional languages -->
+    <script src="https://fredrikekre.se/assets/julia.highlight.js"></script>
+
+
+    <style>
+        body {
+            font-family: Consolas, 'Courier New', monospace;
+            max-width: 1000px;
+            margin: 2em auto;
+            padding: 0 1em;
+            line-height: 1.6;
+            background-color: #0F1319;
+            color: #DADADA;
+            font-size: 14px;
+        }
+        h1 {
+            text-align: left;
+        }
+        pre {
+            background: #568;
+            padding: 2px;
+            overflow-x: auto;
+            border-radius: 5px;
+        }
+        .card {
+            margin-bottom: 40px;
+            padding: 10px;
+            
+            border-radius: 10px;
+            background: #111;
+            box-shadow: -10px -10px 10px #111 , 10px 10px 10px #111 , -10px 10px 10px #111 , 10px -10px 10px #111;
+        }
+        .lang-tag {
+            font-size: 0.9em;
+            color: #777;
+            background-color: #222;
+            padding: 0 3px 2px 3px;
+            border-radius: 3px;
+        }
+        a {
+            color: #33afc4;
+        }
+        a:hover{
+            color: #33afc4;
+            text-decoration-line:none;
+        }
+
+        /* コピー用ボタンの基本スタイル */
+        .copy-btn {
+        position: absolute;
+        top: 0.5em;
+        right: 0.5em;
+        padding: 0.25em 0.5em;
+        font-size: 0.8em;
+        border: none;
+        border-radius: 3px;
+        background: #333;
+        color: #fff;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+        }
+        .copy-btn:hover {
+        opacity: 1;
+        }
+        /* codeブロックとボタンをまとめるコンテナ */
+        .code-container {
+        position: relative;
+        margin: 1em 0;
+        }
+    </style>
 </head>
 <body>
-  <h1>コードギャラリー</h1>
+    <h1>Codes</h1>
 
-  <div class="card">
-    <h2>1. 高速積分 (Julia)</h2>
-    <p>Double Exponential（双曲正接）公式を使った高精度積分の例です。</p>
-    <span class="lang-tag">julia</span>
-    <pre><code class="language-julia">
-using DoubleExponentialFormulas
-
-function f(x)
-    exp(-x^2)
+    <div class="card">
+        <h2>完全楕円積分 Elliptic integral</h2>
+        <p>参考: <a href="http://totoha.net/fc2_mirror2/Complete_Elliptical_Integral.pdf" target="_blank" rel="noopener noreferrer">第 1 種および第 2 種完全楕円積分の数値計算プログラム   2018.8.3 鈴木 実</a></p>
+        <span class="lang-tag">julia</span>
+        <div class="code-container"><pre><code class="julia">function th3(q::BigFloat,n::Int64)::BigFloat
+    s = zero(BigFloat)
+    for i in 1:n
+        s += q^(i^2)
+    end
+    return s*2+1
 end
 
-result = integral(f, -1, 1)
-println(result)
-    </code></pre>
-  </div>
+function eps_to_q(eps::BigFloat,n::Int)::BigFloat
+    q = zero(BigFloat)
+    for i in 1:n
+        q = eps_q_for_n(eps,q,i)
+    end
+    return q
+end
 
-  <div class="card">
-    <h2>2. エラトステネスの篩 (C)</h2>
-    <p>整数の素数判定に使われる古典的なアルゴリズムです。</p>
-    <span class="lang-tag">c</span>
-    <pre><code class="language-c">
-#include &lt;stdio.h&gt;
-#include &lt;stdbool.h&gt;
+function eps_q_for_n(eps::BigFloat,q::BigFloat,n::Int)::BigFloat
+    if iseven(n)
+        r = eps + 2*q^4*eps
+        for i in 4:2:n
+            r += (-1)*q^((i-1)^2) + 2*q^(i^2)*eps
+        end
+    else
+        r = eps
+        for i in 3:2:n
+            r += 2*q^((i-1)^2)*eps - q^(i^2)
+        end
+    end
+    return r
+end
 
-void sieve(int n) {
-    bool prime[n+1];
-    for (int i = 0; i <= n; i++) prime[i] = true;
-    prime[0] = prime[1] = false;
-    for (int i = 2; i*i <= n; i++) {
-        if (prime[i]) {
-            for (int j = i*i; j <= n; j += i)
-                prime[j] = false;
-        }
-    }
-    for (int i = 2; i <= n; i++)
-        if (prime[i]) printf("%d ", i);
-}
-    </code></pre>
-  </div>
+#=
+q=e + 2q^4e - q^9 + 2q^16e - q^25
+0=     - q        - q^9          - q^25
+   + e     +2q^4e       + 2q^16e
+=#
+
+function sigm(q::BigFloat,ll::Int64)::BigFloat
+    s = zero(BigFloat)
+    for i in 1:ll
+        s += (q^(i&lt;&lt;1))/((1-q^(i&lt;&lt;1))^2)
+    end
+    return s
+end
+
+function yK(k::BigFloat,ll::Int64)::BigFloat
+    if k^2 >= 0.5
+        return yK_(sqrt(1-k^2),ll)
+    end
+
+    k_ = sqrt(1-k^2)
+
+    eps = -(1/2)+1/(1+sqrt(k_))
+
+    q = eps_to_q(eps,ll)
+
+    return (pi/2)*(th3(q,ll))^2
+end
+
+function yK_(k::BigFloat,ll::Int64)::BigFloat
+    if k^2 >= 0.5
+        return yK(sqrt(1-k^2),ll)
+    end
+
+    k_ = sqrt(1-k^2)
+
+    eps = -(1/2)+1/(1+sqrt(k_))
+
+    q = eps_to_q(eps,ll)
+
+    return (-log(q)/2)*(th3(q,ll))^2
+end
+
+function yE(k::BigFloat,ll::Int64)::BigFloat
+    if k^2 >= 0.5
+        return yE_(sqrt(1-k^2),ll)
+    end
+
+    k_ = sqrt(1-k^2)
+
+    eps = -(1/2)+1/(1+sqrt(k_))
+
+    q = eps_to_q(eps,ll)
+
+    t = th3(q,ll)
+
+    s = sigm(q,1000)
+
+
+    return pi*( (1/t^2)*(1/BigFloat(6)-4*s) + t^2*((2-k^2)/BigFloat(6)) )
+end
+
+function yE_(k::BigFloat,ll::Int64)::BigFloat
+    if k^2 >= 0.5
+        return yE(sqrt(1-k^2),ll)
+    end
+
+    if k &lt;= big"4.5e-154"
+        return 1
+    end
+
+    k_ = sqrt(1-k^2)
+
+    eps = -(1/2)+1/(1+sqrt(k_))
+
+    q = eps_to_q(eps,ll)
+
+    t = th3(q,ll)
+
+    s = sigm(q,1000)
+
+    lnq = log(q)
+
+    return -t^2*lnq*((1+k^2)/BigFloat(6)) + (1/t^2)*(lnq*(1/BigFloat(6)-4*s)+1)
+end
+        </code></pre></div>
+        参考文献には ln(1/q) と書いているが -ln(q) とした方が精度がちょっと良くなる
+    </div>
+
+
+    <div class="card">
+        <h2>平方数判定</h2>
+        <p>参考: <a href="https://na-inet.jp/na/gmp-6.1.2_ja.pdf" target="_blank" rel="noopener noreferrer">GNU MP p.39</a></p>
+        <span class="lang-tag">julia</span>
+        <div class="code-container"><pre><code class="julia">
+libgmp = Base.GMP.libgmp
+
+perfect_square(x::BigInt) = Int(ccall((:__gmpz_perfect_square_p, libgmp), Cint, (Ref{BigInt},), x))
+        </code></pre></div>
+        あまり知られていないが、GMPの方に平方数判定専用の関数がある。ccallを使って呼び出せば、
+        アセンブラまで最適化された平方数判定関数が手に入る。
+        同じようにn乗根を求めて整数部のみ取り出す関数もGMP側にあるので、立法数以上の判定はそれを使うとかするといい。
+    </div>
+
+    <div class="card">
+        <h2>ε-算法 (数列の加速法)</h2>
+        <p><a href="https://www.lab.twcu.ac.jp/~osada//rikei/rikei2008-10.pdf" target="_blank" rel="noopener noreferrer">お話：数値解析 第 6 回   収束の加速法 (中編)    長田直樹</a></p>
+        <span class="lang-tag">julia</span>
+        <div class="code-container"><pre><code class="julia">
+epsilon_array1 = zeros(BigFloat,Int(floor(log2(p))))
+epsilon_array2 = zeros(BigFloat,Int(floor(log2(p))))
+for i in 1:Int(floor(log2(p)))
+    epsilon_array2[i] = answer_array[2^i]
+end
+
+
+for i in 1:Int(floor(log2(p) / 2.0)-1)
+    epsilon_subarray = 1 ./(circshift(epsilon_array2,-1) .- epsilon_array2)
+
+    epsilon_array1 = circshift(epsilon_array1,-1) .+ epsilon_subarray
+
+    pop!(epsilon_array1)
+    pop!(epsilon_array2)
+
+    epsilon_subarray = 1 ./(circshift(epsilon_array1,-1) .- epsilon_array1)
+
+    epsilon_array2 = circshift(epsilon_array2,-1) .+ epsilon_subarray
+
+    pop!(epsilon_array2)
+    pop!(epsilon_array1)
+
+end
+
+println()
+println("epsilon:")
+println(stderr,epsilon_array2[end])
+
+println()
+println("epsilon:")
+println(stderr,epsilon_array1[end])
+        </code></pre></div>
+    </div>
+
+    <script>
+        hljs.highlightAll()
+    
+        // 2) コピー用ボタンをコードブロックに追加する
+        document.querySelectorAll('.code-container').forEach(container => {
+            // ボタン要素を作成
+            const btn = document.createElement('button');
+            btn.innerText = 'Copy';
+            btn.className = 'copy-btn';
+            container.appendChild(btn);
+    
+            // クリック時の処理
+            btn.addEventListener('click', () => {
+                // コードテキストを取得
+                const code = container.querySelector('code').innerText;
+                // クリップボードに書き込み
+                navigator.clipboard.writeText(code).then(() => {
+                    // コピー完了フィードバック
+                    btn.innerText = 'Copied!';
+                    setTimeout(() => btn.innerText = 'Copy', 1000);
+                }).catch(err => {
+                    console.error('コピーに失敗しました:', err);
+                    btn.innerText = 'Error';
+                    setTimeout(() => btn.innerText = 'Copy', 1000);
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>

@@ -1,0 +1,147 @@
+pre code.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 1em;
+    line-height: 20px;
+  }
+  code.hljs {
+    padding: 3px 5px;
+    border-radius: 3px;
+  }
+  /*
+   * Visual Studio 2015 dark style
+   * Author: Nicolas LLOBERA <nllobera@gmail.com>
+   */
+  .hljs {
+    background: #1E1E1E;
+    color: #DADADA;
+    font-family: Consolas, 'Courier New', monospace;
+  }
+  
+  .hljs-keyword {
+    color: #569CD6;
+  }
+
+  .hljs-literal{
+    color:#B5CEA8;
+  }
+
+  .hljs-symbol{
+    color: #DCAADC
+  }
+  .hljs-name {
+    color: red
+  }
+  .hljs-link {
+    color: red;
+    text-decoration: underline
+  }
+  .hljs-built_in{
+    color: #B4B4B4;
+  }
+  .hljs-type {
+    color: #4EC9B0
+  }
+  .hljs-number{
+    color: #B5CEA8;
+  }
+  .hljs-class {
+    color: #DACAFF
+  }
+  .hljs-string{
+    color: #CE9178;
+  }
+  .hljs-meta .hljs-string {
+    color: #FF0000
+  }
+  .hljs-regexp{
+    color: #FF0000;
+  }
+  .hljs-template-tag {
+    color: #FF0000
+  }
+  .hljs-subst{
+    color: #9CDCFE;
+  }
+  .hljs-function{
+    color: red;
+  }
+  .hljs-title{
+    color: #DCDCAA;
+  }
+  .hljs-params{
+    color: #DADADA;
+  }
+  .hljs-formula {
+    color: #DCDCDC
+  }
+  .hljs-comment{
+    color: #57A64A;
+  }
+  .hljs-quote {
+    color: red;
+  }
+  .hljs-doctag {
+    color: #FF0000
+  }
+  .hljs-meta{
+    color: red;
+  }
+  .hljs-meta .hljs-keyword{
+    color: red;
+  }
+  .hljs-tag {
+    color: #FF0000
+  }
+  .hljs-variable{
+    color: red;
+  }
+  .hljs-template-variable {
+    color: red;
+  }
+  .hljs-attr{
+    color: red;
+  }
+  .hljs-attribute {
+    color: red
+  }
+  .hljs-section {
+    color: red
+  }
+  .hljs-emphasis {
+    /*font-style: italic*/
+  }
+  .hljs-strong {
+    font-weight: bold
+  }
+  .hljs-code {
+    font-family: Consolas, 'Courier New', monospace;
+  }
+  .hljs-bullet{
+    color: red;
+  }
+  .hljs-selector-tag{
+    color: red;
+  }
+  .hljs-selector-id{
+    color: red;
+  }
+  .hljs-selector-class{
+    color: red;
+  }
+  .hljs-selector-attr{
+    color: red;
+  }
+  .hljs-selector-pseudo {
+    color: red
+  }
+  .hljs-addition {
+    background-color: red;
+    display: inline-block;
+    width: 100%
+  }
+  .hljs-deletion {
+    background-color: red;
+    display: inline-block;
+    width: 100%
+  }
