@@ -257,6 +257,83 @@ println(stderr,epsilon_array1[end])
         </code></pre></div>
     </div>
 
+    <div class="card">
+        <h2>2-強擬素数判定関数</h2>
+        <p>参考: <a href="https://qiita.com/ayase/items/6b3a2231eec82c2ad43a" target="_blank" rel="noopener noreferrer">ミラーラビン法による確率的素数判定</a></p>
+        <span class="lang-tag">julia</span>
+        <div class="code-container"><pre><code class="julia">
+# 2-強擬素数判定関数
+function is_strong_pseudoprime(n::BigInt)
+    # n-1 = 2^s * d (d は奇数)
+    d = n - 1
+
+    s = trailing_zeros(d)
+    d = d>>s
+
+    # x = 2^d mod n
+    x = powermod(2, d, n)
+    if x == 1 || x == n - 1
+        return true
+    end
+    # 反復平方
+    for _ in 2:s
+        x = (x * x) % n
+        if x == n - 1
+            return true
+        end
+    end
+    return false
+end
+    </code></pre></div>
+        trailing_zerosはd*2^sの形にするときによく使うよね
+    </div>
+
+    <div class="card">
+        <h2>約数関数</h2>
+        <p>参考: <a href="https://ja.wikipedia.org/wiki/%E7%B4%84%E6%95%B0%E9%96%A2%E6%95%B0" target="_blank" rel="noopener noreferrer">約数関数</a></p>
+        <span class="lang-tag">julia</span>
+        <div class="code-container"><pre><code class="julia">
+"""
+    sigma(n::Integer) -> Integer
+
+与えられた自然数 `n` のすべての正の約数の和 sigma(n) を返す。
+"""
+function sigma(n::Integer)::BigInt
+    n == 1 && return BigInt(1)
+    f = factor(n)
+    s = BigInt(1)
+    for (p, e) in f
+        s *= div((BigInt(p)^(e + 1) - 1) , (BigInt(p) - 1))
+    end
+    return s
+end
+
+"""
+    sigma(n::Integer, x::Integer) -> Integer
+
+与えられた自然数 `n` のすべての正の約数のx乗和 sigma(n,x) を返す。
+"""
+function sigma(n::Integer, x::Integer)::BigInt
+    n == 1 && return BigInt(1)
+    f = factor(n)
+    s = BigInt(1)
+    if x == 1
+        for (p, e) in f
+            s *= (e+1)
+        end
+        return s
+    end
+    for (p, e) in f
+        s *= div((BigInt(p)^((e + 1)*x) - 1) , (BigInt(p)^x - 1))
+    end
+    return s
+end
+    </code></pre></div>
+        素因数分解して積の形でやると早いよね
+    </div>
+
+
+
     <script>
         hljs.highlightAll()
     
