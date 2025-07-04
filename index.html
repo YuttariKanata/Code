@@ -223,14 +223,14 @@ perfect_square(x::BigInt) = Int(ccall((:__gmpz_perfect_square_p, libgmp), Cint, 
         <p><a href="https://www.lab.twcu.ac.jp/~osada//rikei/rikei2008-10.pdf" target="_blank" rel="noopener noreferrer">お話：数値解析 第 6 回   収束の加速法 (中編)    長田直樹</a></p>
         <span class="lang-tag">julia</span>
         <div class="code-container"><pre><code class="julia">
-epsilon_array1 = zeros(BigFloat,Int(floor(log2(p))))
-epsilon_array2 = zeros(BigFloat,Int(floor(log2(p))))
-for i in 1:Int(floor(log2(p)))
-    epsilon_array2[i] = answer_array[2^i]
+epsilon_array1 = zeros(BigFloat,p)
+epsilon_array2 = zeros(BigFloat,p)
+for i in 1:p
+    epsilon_array2[i] = answer_array[i]
 end
 
 
-for i in 1:Int(floor(log2(p) / 2.0)-1)
+for i in 1:Int(floor(p / 2.0)-1)
     epsilon_subarray = 1 ./(circshift(epsilon_array2,-1) .- epsilon_array2)
 
     epsilon_array1 = circshift(epsilon_array1,-1) .+ epsilon_subarray
