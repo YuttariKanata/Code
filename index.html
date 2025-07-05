@@ -243,6 +243,7 @@ function yE_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
     return -t^2*lnq*((1+k^2)/BigFloat(6)) + (1/t^2)*(lnq*(1/BigFloat(6)-4*s)+1)
 end</code></pre>
             </div>
+            完全楕円積分は MPFR にはない関数の中でも有名じゃね？
             実は、SpecialFunctions.jl の実装は piecewise approximation polynomial を使用していると書いています。
             実際中身を見ると確かにそうなってるので、任意精度にするには別の実装がいります。<br>
             あと Elliptic.jl というのもあって、そっちでは引数が ::Float64 にはなっていますが、反復による評価をしているので
@@ -317,7 +318,8 @@ println(stderr,epsilon_array1[end])</code></pre>
             詳しいことは参考文献を確認してください。<br>
             answer_array が収束させたい数列です。<br>
             1 から p まで p 項あるとしています。<br>
-            高速化はしてないです。
+            高速化はしてないです。<br>
+            epsilon を二つ出していますが、それはどっちに加速された値が出るのか忘れたからです。
         </div>
     </div>
 
@@ -327,7 +329,7 @@ println(stderr,epsilon_array1[end])</code></pre>
             <span class="toggle-title" style="margin-left: 10px;">2-強擬素数判定関数</span>
         </h2>
         <div class="toggle-content">
-            <p>参考: <a href="https://qiita.com/ayase/items/6b3a2231eec82c2ad43a" target="_blank" rel="noopener noreferrer">ミラーラビン法による確率的素数判定</a></p>
+            <p>参考: <a href="https://qiita.com/ayase/items/6b3a2231eec82c2ad43a" target="_blank" rel="noopener noreferrer">ミラーラビン法による確率的素数判定 (Qiita)</a></p>
             <span class="lang-tag">julia</span>
             <div class="code-container"><pre><code class="julia"># 2-強擬素数判定関数
 function is_strong_pseudoprime(n::BigInt)
