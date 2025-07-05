@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>コードギャラリー (Julia & C)</title>
+    <title>Codes (julia)</title>
     <link rel="stylesheet" href="vs2015.css">
     <script src="jl.js"></script>
     <!-- and it's easy to individually load additional languages -->
@@ -19,6 +19,7 @@
             background-color: #0F1319;
             color: #DADADA;
             font-size: 14px;
+            word-break: keep-all;
         }
         h1 {
             text-align: left;
@@ -129,12 +130,16 @@ function sigm(q::BigFloat,ll::Int64)::BigFloat
     return s
 end
 
-function yK(k::BigFloat,ll::Int64)::BigFloat
-    if k^2 >= 0.5
-        return yK_(sqrt(1-k^2),ll)
+function yK(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
+    if k^2 &gt;= 0.5 &amp;&amp; !is_k_
+        return yK_(k,ll; is_k_ = true)
     end
 
-    k_ = sqrt(1-k^2)
+    if !is_k_
+        k_ = sqrt(1-k^2)
+    else
+        k_ = k
+    end
 
     eps = -(1/2)+1/(1+sqrt(k_))
 
@@ -143,12 +148,16 @@ function yK(k::BigFloat,ll::Int64)::BigFloat
     return (pi/2)*(th3(q,ll))^2
 end
 
-function yK_(k::BigFloat,ll::Int64)::BigFloat
-    if k^2 >= 0.5
-        return yK(sqrt(1-k^2),ll)
+function yK_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
+    if k^2 &gt;= 0.5 &amp;&amp; !is_k_
+        return yK(k,ll; is_k_ = true)
     end
 
-    k_ = sqrt(1-k^2)
+    if !is_k_
+        k_ = sqrt(1-k^2)
+    else
+        k_ = k
+    end   
 
     eps = -(1/2)+1/(1+sqrt(k_))
 
@@ -157,12 +166,16 @@ function yK_(k::BigFloat,ll::Int64)::BigFloat
     return (-log(q)/2)*(th3(q,ll))^2
 end
 
-function yE(k::BigFloat,ll::Int64)::BigFloat
-    if k^2 >= 0.5
+function yE(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
+    if k^2 &gt;= 0.5 &amp;&amp; !is_k_
         return yE_(sqrt(1-k^2),ll)
     end
 
-    k_ = sqrt(1-k^2)
+    if !is_k_
+        k_ = sqrt(1-k^2)
+    else
+        k_ = k
+    end  
 
     eps = -(1/2)+1/(1+sqrt(k_))
 
@@ -176,16 +189,20 @@ function yE(k::BigFloat,ll::Int64)::BigFloat
     return pi*( (1/t^2)*(1/BigFloat(6)-4*s) + t^2*((2-k^2)/BigFloat(6)) )
 end
 
-function yE_(k::BigFloat,ll::Int64)::BigFloat
-    if k^2 >= 0.5
-        return yE(sqrt(1-k^2),ll)
+function yE_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
+    if k^2 &gt;= 0.5 &amp;&amp; !is_k_
+        return yE(k,ll, is_k_ = true)
     end
 
-    if k &lt;= big"4.5e-154"
+    if k &lt;= big&quot;4.5e-154&quot; &amp;&amp; !is_k_
         return 1
     end
 
-    k_ = sqrt(1-k^2)
+    if !is_k_
+        k_ = sqrt(1-k^2)
+    else
+        k_ = k
+    end  
 
     eps = -(1/2)+1/(1+sqrt(k_))
 
@@ -198,11 +215,18 @@ function yE_(k::BigFloat,ll::Int64)::BigFloat
     lnq = log(q)
 
     return -t^2*lnq*((1+k^2)/BigFloat(6)) + (1/t^2)*(lnq*(1/BigFloat(6)-4*s)+1)
-end
-        </code></pre></div>
-        参考文献には ln(1/q) と書いているが -ln(q) とした方が精度がちょっと良くなる
+end</code></pre></div>
+        実は、SpecialFunctions.jl の実装は piecewise approximation polynomial を使用していると書いています。
+        実際中身を見ると確かにそうなってるので、任意精度にするには別の実装がいります。<br>
+        あと Elliptic.jl というのもあって、そっちでは引数が ::Float64 にはなっていますが、反復による評価をしているので
+        コードだけ引き抜いて ::Float64 を ::BigFloat にして任意精度にするのもいいのかもしれません。<br>
+        <br>
+        参考文献には ln(1/q) と書いているが -ln(q) とした方が精度がちょっと良くなる。<br>
+        ll は反復を何回するか あと途中に sigm(q,1000) とあるが、この 1000 も反復を何回するかなので、
+        各自で自分の計算にとって適切な値にしてほしい。<br>
+        <br>
+        yK の最悪精度を調べてみると、各 ll に対して約 ll*4.556+1.09109 桁の精度(10進数で)が得られました
     </div>
-
 
     <div class="card">
         <h2>平方数判定</h2>
@@ -215,7 +239,7 @@ perfect_square(x::BigInt) = Int(ccall((:__gmpz_perfect_square_p, libgmp), Cint, 
         </code></pre></div>
         あまり知られていないが、GMPの方に平方数判定専用の関数がある。ccallを使って呼び出せば、
         アセンブラまで最適化された平方数判定関数が手に入る。
-        同じようにn乗根を求めて整数部のみ取り出す関数もGMP側にあるので、立法数以上の判定はそれを使うとかするといい。
+        同じようにn乗根を求めて整数部のみ取り出す関数もGMP側にあるので、立方数以上の判定はそれを使うとかするといい。
     </div>
 
     <div class="card">
@@ -255,6 +279,8 @@ println()
 println("epsilon:")
 println(stderr,epsilon_array1[end])
         </code></pre></div>
+        詳しいことは参考文献を確認してください。
+        answer_array が収束させたい数列です。 1 から p まで p 項あるとしています。高速化はしてないです。
     </div>
 
     <div class="card">
@@ -290,7 +316,7 @@ end
 
     <div class="card">
         <h2>約数関数</h2>
-        <p>参考: <a href="https://ja.wikipedia.org/wiki/%E7%B4%84%E6%95%B0%E9%96%A2%E6%95%B0" target="_blank" rel="noopener noreferrer">約数関数</a></p>
+        <p>参考: <a href="https://ja.wikipedia.org/wiki/%E7%B4%84%E6%95%B0%E9%96%A2%E6%95%B0" target="_blank" rel="noopener noreferrer">約数関数 (Wikipedia)</a></p>
         <span class="lang-tag">julia</span>
         <div class="code-container"><pre><code class="julia">
 """
