@@ -20,6 +20,7 @@
             color: #DADADA;
             font-size: 14px;
             word-break: keep-all;
+            user-select: none /* 選択を禁止する */
         }
         h1 {
             text-align: left;
@@ -55,37 +56,62 @@
 
         /* コピー用ボタンの基本スタイル */
         .copy-btn {
-        position: absolute;
-        top: 0.5em;
-        right: 0.5em;
-        padding: 0.25em 0.5em;
-        font-size: 0.8em;
-        border: none;
-        border-radius: 3px;
-        background: #333;
-        color: #fff;
-        cursor: pointer;
-        opacity: 0.6;
-        transition: opacity 0.2s;
+            position: absolute;
+            top: 0.5em;
+            right: 0.5em;
+            padding: 0.25em 0.5em;
+            font-size: 0.8em;
+            border: none;
+            border-radius: 3px;
+            background: #333;
+            color: #fff;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
         }
         .copy-btn:hover {
-        opacity: 1;
+            opacity: 1;
         }
         /* codeブロックとボタンをまとめるコンテナ */
         .code-container {
-        position: relative;
-        margin: 1em 0;
+            position: relative;
+            margin: 1em 0;
+        }
+        .toggle-header {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0;
+        }
+        .toggle-icon {
+            display: inline-block;
+            width: 1em;
+            text-align: center;
+            transition: opacity .5s;
+            opacity: 0.6;
+        }
+        .toggle-content {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height .5s cubic-bezier(0.5,0,0,1) , padding-top .5s cubic-bezier(.26,.74,.45,.83), opacity .5s cubic-bezier(.25,.75,.5,1);
+            padding-top: 0;
+            padding-bottom: 0;
         }
     </style>
 </head>
 <body>
     <h1>Codes</h1>
-
+    <p style="padding-bottom: 20px;">今までに書いたコードを置いておきます</p>
+    
     <div class="card">
-        <h2>完全楕円積分 Elliptic integral</h2>
-        <p>参考: <a href="http://totoha.net/fc2_mirror2/Complete_Elliptical_Integral.pdf" target="_blank" rel="noopener noreferrer">第 1 種および第 2 種完全楕円積分の数値計算プログラム   2018.8.3 鈴木 実</a></p>
-        <span class="lang-tag">julia</span>
-        <div class="code-container"><pre><code class="julia">function th3(q::BigFloat,n::Int64)::BigFloat
+        <h2 class="toggle-header">
+            <span class="toggle-icon">˅</span>
+            <span class="toggle-title" style="margin-left: 10px;">完全楕円積分 Elliptic integral (任意精度)</span>
+        </h2>
+        <div class="toggle-content">
+            <p>参考: <a href="http://totoha.net/fc2_mirror2/Complete_Elliptical_Integral.pdf" target="_blank" rel="noopener noreferrer">第 1 種および第 2 種完全楕円積分の数値計算プログラム   2018.8.3 鈴木 実</a></p>
+            <span class="lang-tag">julia</span>
+            <div class="code-container"><pre><code class="julia">function th3(q::BigFloat,n::Int64)::BigFloat
     s = zero(BigFloat)
     for i in 1:n
         s += q^(i^2)
@@ -119,7 +145,7 @@ end
 #=
 q=e + 2q^4e - q^9 + 2q^16e - q^25
 0=     - q        - q^9          - q^25
-   + e     +2q^4e       + 2q^16e
++ e     +2q^4e       + 2q^16e
 =#
 
 function sigm(q::BigFloat,ll::Int64)::BigFloat
@@ -215,39 +241,48 @@ function yE_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
     lnq = log(q)
 
     return -t^2*lnq*((1+k^2)/BigFloat(6)) + (1/t^2)*(lnq*(1/BigFloat(6)-4*s)+1)
-end</code></pre></div>
-        実は、SpecialFunctions.jl の実装は piecewise approximation polynomial を使用していると書いています。
-        実際中身を見ると確かにそうなってるので、任意精度にするには別の実装がいります。<br>
-        あと Elliptic.jl というのもあって、そっちでは引数が ::Float64 にはなっていますが、反復による評価をしているので
-        コードだけ引き抜いて ::Float64 を ::BigFloat にして任意精度にするのもいいのかもしれません。<br>
-        <br>
-        参考文献には ln(1/q) と書いているが -ln(q) とした方が精度がちょっと良くなる。<br>
-        ll は反復を何回するか あと途中に sigm(q,1000) とあるが、この 1000 も反復を何回するかなので、
-        各自で自分の計算にとって適切な値にしてほしい。<br>
-        <br>
-        yK の最悪精度を調べてみると、各 ll に対して約 ll*4.556+1.09109 桁の精度(10進数で)が得られました
+end</code></pre>
+            </div>
+            実は、SpecialFunctions.jl の実装は piecewise approximation polynomial を使用していると書いています。
+            実際中身を見ると確かにそうなってるので、任意精度にするには別の実装がいります。<br>
+            あと Elliptic.jl というのもあって、そっちでは引数が ::Float64 にはなっていますが、反復による評価をしているので
+            コードだけ引き抜いて ::Float64 を ::BigFloat にして任意精度にするのもいいのかもしれません。<br>
+            <br>
+            参考文献には ln(1/q) と書いているが -ln(q) とした方が精度がちょっと良くなる。<br>
+            ll は反復を何回するか あと途中に sigm(q,1000) とあるが、この 1000 も反復を何回するかなので、
+            各自で自分の計算にとって適切な値にしてほしい。<br>
+            <br>
+            yK の最悪精度を調べてみると、各 ll に対して約 ll*4.556+1.09109 桁の精度(10進数で)が得られました
+        </div>
     </div>
 
     <div class="card">
-        <h2>平方数判定</h2>
-        <p>参考: <a href="https://na-inet.jp/na/gmp-6.1.2_ja.pdf" target="_blank" rel="noopener noreferrer">GNU MP p.39</a></p>
-        <span class="lang-tag">julia</span>
-        <div class="code-container"><pre><code class="julia">
-libgmp = Base.GMP.libgmp
+        <h2 class="toggle-header">
+            <span class="toggle-icon">˅</span>
+            <span class="toggle-title" style="margin-left: 10px;">平方数判定</span>
+        </h2>
+        <div class="toggle-content">
+            <p>参考: <a href="https://na-inet.jp/na/gmp-6.1.2_ja.pdf" target="_blank" rel="noopener noreferrer">GNU MP p.39</a></p>
+            <span class="lang-tag">julia</span>
+            <div class="code-container"><pre><code class="julia">libgmp = Base.GMP.libgmp
 
-perfect_square(x::BigInt) = Int(ccall((:__gmpz_perfect_square_p, libgmp), Cint, (Ref{BigInt},), x))
-        </code></pre></div>
-        あまり知られていないが、GMPの方に平方数判定専用の関数がある。ccallを使って呼び出せば、
-        アセンブラまで最適化された平方数判定関数が手に入る。
-        同じようにn乗根を求めて整数部のみ取り出す関数もGMP側にあるので、立方数以上の判定はそれを使うとかするといい。
+perfect_square(x::BigInt) = Int(ccall((:__gmpz_perfect_square_p, libgmp), Cint, (Ref{BigInt},), x))</code></pre>
+            </div>
+            あまり知られていないが、GMPの方に平方数判定専用の関数がある。ccallを使って呼び出せば、
+            アセンブラまで最適化された平方数判定関数が手に入る。
+            同じようにn乗根を求めて整数部のみ取り出す関数もGMP側にあるので、立方数以上の判定はそれを使うとかするといい。
+        </div>
     </div>
-
+        
     <div class="card">
-        <h2>ε-算法 (数列の加速法)</h2>
-        <p><a href="https://www.lab.twcu.ac.jp/~osada//rikei/rikei2008-10.pdf" target="_blank" rel="noopener noreferrer">お話：数値解析 第 6 回   収束の加速法 (中編)    長田直樹</a></p>
-        <span class="lang-tag">julia</span>
-        <div class="code-container"><pre><code class="julia">
-epsilon_array1 = zeros(BigFloat,p)
+        <h2 class="toggle-header">
+            <span class="toggle-icon">˅</span>
+            <span class="toggle-title" style="margin-left: 10px;">ε-算法 (数列の加速法)</span>
+        </h2>
+        <div class="toggle-content">
+            <p>参考: <a href="https://www.lab.twcu.ac.jp/~osada//rikei/rikei2008-10.pdf" target="_blank" rel="noopener noreferrer">お話：数値解析 第 6 回   収束の加速法 (中編)    長田直樹</a></p>
+            <span class="lang-tag">julia</span>
+            <div class="code-container"><pre><code class="julia">epsilon_array1 = zeros(BigFloat,p)
 epsilon_array2 = zeros(BigFloat,p)
 for i in 1:p
     epsilon_array2[i] = answer_array[i]
@@ -277,18 +312,24 @@ println(stderr,epsilon_array2[end])
 
 println()
 println("epsilon:")
-println(stderr,epsilon_array1[end])
-        </code></pre></div>
-        詳しいことは参考文献を確認してください。
-        answer_array が収束させたい数列です。 1 から p まで p 項あるとしています。高速化はしてないです。
+println(stderr,epsilon_array1[end])</code></pre>
+            </div>
+            詳しいことは参考文献を確認してください。<br>
+            answer_array が収束させたい数列です。<br>
+            1 から p まで p 項あるとしています。<br>
+            高速化はしてないです。
+        </div>
     </div>
 
     <div class="card">
-        <h2>2-強擬素数判定関数</h2>
-        <p>参考: <a href="https://qiita.com/ayase/items/6b3a2231eec82c2ad43a" target="_blank" rel="noopener noreferrer">ミラーラビン法による確率的素数判定</a></p>
-        <span class="lang-tag">julia</span>
-        <div class="code-container"><pre><code class="julia">
-# 2-強擬素数判定関数
+        <h2 class="toggle-header">
+            <span class="toggle-icon">˅</span>
+            <span class="toggle-title" style="margin-left: 10px;">2-強擬素数判定関数</span>
+        </h2>
+        <div class="toggle-content">
+            <p>参考: <a href="https://qiita.com/ayase/items/6b3a2231eec82c2ad43a" target="_blank" rel="noopener noreferrer">ミラーラビン法による確率的素数判定</a></p>
+            <span class="lang-tag">julia</span>
+            <div class="code-container"><pre><code class="julia"># 2-強擬素数判定関数
 function is_strong_pseudoprime(n::BigInt)
     # n-1 = 2^s * d (d は奇数)
     d = n - 1
@@ -309,17 +350,21 @@ function is_strong_pseudoprime(n::BigInt)
         end
     end
     return false
-end
-    </code></pre></div>
-        trailing_zerosはd*2^sの形にするときによく使うよね
+end</code></pre>
+            </div>
+            trailing_zerosはd*2^sの形にするときによく使うよね
+        </div>
     </div>
 
     <div class="card">
-        <h2>約数関数</h2>
-        <p>参考: <a href="https://ja.wikipedia.org/wiki/%E7%B4%84%E6%95%B0%E9%96%A2%E6%95%B0" target="_blank" rel="noopener noreferrer">約数関数 (Wikipedia)</a></p>
-        <span class="lang-tag">julia</span>
-        <div class="code-container"><pre><code class="julia">
-"""
+        <h2 class="toggle-header">
+            <span class="toggle-icon">˅</span>
+            <span class="toggle-title" style="margin-left: 10px;">約数関数</span>
+        </h2>
+        <div class="toggle-content">
+            <p>参考: <a href="https://ja.wikipedia.org/wiki/%E7%B4%84%E6%95%B0%E9%96%A2%E6%95%B0" target="_blank" rel="noopener noreferrer">約数関数 (Wikipedia)</a></p>
+            <span class="lang-tag">julia</span>
+            <div class="code-container"><pre><code class="julia">"""
     sigma(n::Integer) -> Integer
 
 与えられた自然数 `n` のすべての正の約数の和 sigma(n) を返す。
@@ -353,9 +398,10 @@ function sigma(n::Integer, x::Integer)::BigInt
         s *= div((BigInt(p)^((e + 1)*x) - 1) , (BigInt(p)^x - 1))
     end
     return s
-end
-    </code></pre></div>
-        素因数分解して積の形でやると早いよね
+end</code></pre>
+            </div>
+            素因数分解して積の形でやると早いよね
+        </div>
     </div>
 
 
@@ -385,6 +431,40 @@ end
                     btn.innerText = 'Error';
                     setTimeout(() => btn.innerText = 'Copy', 1000);
                 });
+            });
+        });
+
+        document.querySelectorAll('.toggle-header').forEach(header => {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+        
+            icon.style.opacity = '1';
+            content.style.maxHeight = '0px';
+            content.style.opacity = '0';
+            content.classList.remove('open');
+        
+            header.addEventListener('click', () => {
+                const isOpen = content.classList.contains('open');
+        
+                if (isOpen) {
+                    // 閉じるとき：max-height を 0 に
+                    content.style.maxHeight = content.scrollHeight + 'px'; // 一旦セットしないと collapse animation 効かないことがある
+                    requestAnimationFrame(() => {
+                        content.style.maxHeight = '0px';
+                        content.style.padding = '0 0 0 0';
+                        content.style.opacity = '0';
+                    });
+                    content.classList.remove('open');
+                    icon.style.opacity = '1';
+                } else {
+                    // 開くとき：scrollHeight にセットしてアニメーション
+                    content.classList.add('open');
+                    const fullHeight = content.scrollHeight;
+                    content.style.maxHeight = fullHeight + 'px';
+                    content.style.padding = '20px 0 0 0';
+                    content.style.opacity = '1';
+                    icon.style.opacity = '0';
+                }
             });
         });
     </script>
