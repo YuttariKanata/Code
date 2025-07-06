@@ -1,20 +1,33 @@
+"""
+    pochhammer(x, n)
 
-using CairoMakie
+Compute the Pochhammer symbol, also known as the rising factorial:  
+``x₍ₙ₎= x * (x + 1) * (x + 2) * ... * (x + n - 1)``.
 
-function makepng()
-    #k = big"0.01":big"0.01":big"1.0"
-    ll = 1:67
-    k_err = Vector{BigFloat}()
-    c = yK(1/sqrt(big"2.0"),2000)
-    for i in 1:67
-        push!(k_err,-log10(abs(yK(1/sqrt(big"2.0"),ll[i])-c)))
-        print("(",k_err[i],"),")
+
+# Arguments
+
+- `x`: A number (can be an integer, floating-point, complex, etc.).
+- `n`: A positive integer specifying how many terms to multiply.
+
+# Examples
+
+```jldoctest
+julia> pochhammer(3, 4)
+360
+
+julia> pochhammer(5.0, 1)
+5.0
+```
+"""
+function pochhammer(x::BigInt, n::BigInt)::BigInt
+    if n <= 0
+        throw(DomainError(n, "pochhammer(x, n) is undefined for n ≤ 0"))
     end
-
-    f = Figure()
-    ax = Axis(f[1, 1], xlabel="k", ylabel="k_err")
-    #lines!(ax, k, k_err)
-    lines!(ax, ll, k_err)
-    save("result4.png",f)
+    result = one(BigInt)
+    for i in 0:BigInt(n - 1)
+        result *= x + i
+    end
+    return result
 end
 
