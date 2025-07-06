@@ -243,7 +243,7 @@ function yE_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
     return -t^2*lnq*((1+k^2)/BigFloat(6)) + (1/t^2)*(lnq*(1/BigFloat(6)-4*s)+1)
 end</code></pre>
             </div>
-            完全楕円積分は MPFR にはない関数の中でも有名じゃね？
+            完全楕円積分は MPFR にはない関数の中でも有名じゃね？<br>
             実は、SpecialFunctions.jl の実装は piecewise approximation polynomial を使用していると書いています。
             実際中身を見ると確かにそうなってるので、任意精度にするには別の実装がいります。<br>
             あと Elliptic.jl というのもあって、そっちでは引数が ::Float64 にはなっていますが、反復による評価をしているので
