@@ -407,7 +407,94 @@ end</code></pre>
         </div>
     </div>
 
+    <div class="card">
+        <h2 class="toggle-header">
+            <span class="toggle-icon">˅</span>
+            <span class="toggle-title" style="margin-left: 10px;">Pochhammer記号</span>
+        </h2>
+        <div class="toggle-content">
+            <p>参考: <a href="https://ja.wikipedia.org/wiki/%E3%83%9D%E3%83%83%E3%83%9B%E3%83%8F%E3%83%9E%E3%83%BC%E8%A8%98%E5%8F%B7" target="_blank" rel="noopener noreferrer">ポッホハマー記号</a></p>
+            <span class="lang-tag">julia</span>
+            <div class="code-container"><pre><code class="julia">using SpecialFunctions
+libgmp = Base.GMP.libgmp
+function divexact(x::BigInt,y::BigInt)::BigInt
+    z = BigInt()
+    ccall((:__gmpz_divexact, libgmp), Cvoid, (Ref{BigInt}, Ref{BigInt}, Ref{BigInt}), z, x, y)
+    z
+end
 
+function pochhammer_bigint(x::BigInt, n::BigInt)::BigInt
+    if n &lt;= 0
+        throw(DomainError(n, &quot;pochhammer(x, n) is undefined for n ≤ 0&quot;))
+    end
+    result = one(BigInt)
+    for i in 0:BigInt(n - 1)
+        result *= x + i
+    end
+    return result
+end
+
+function pochhammer_int(x::Int64, n::Int64)::BigInt
+    if n &lt;= 0
+        throw(DomainError(n, &quot;pochhammer(x, n) is undefined for n ≤ 0&quot;))
+    end
+    result = one(BigInt)
+    for i in 0:(n - 1)
+        result *= x + i
+    end
+    return result
+end
+
+function pochhammer_gmp(x::BigInt, n::BigInt)::BigInt
+    if n &lt;= 0
+        throw(DomainError(n, &quot;pochhammer(x, n) is undefined for n ≤ 0&quot;))
+    end
+    return divexact(factorial(x+n-1),factorial(x-1))
+end
+
+function pochhammer_mpfr(x::BigFloat, n::BigFloat)::BigFloat
+    if (isinteger(x) &amp;&amp; x&lt;=0) || (isinteger(x+n) &amp;&amp; x+n&lt;=0)
+        throw(DomainError(n, &quot;pochhammer(x, n) is undefined for x or x+n is a non-positive integer.&quot;))
+    end
+    return div(SpecialFunctions._gamma(x+n),SpecialFunctions._gamma(x))
+end</code></pre>
+            </div>
+            x に比べて n がまぁまぁ小さいときは pochhammer_bigint を使うべき。<br>
+            result_200.png は n が 200 に固定されているときの pochhammer_bigint と pochhammer_gmp の実行時間比較。<br>
+            (他のpngも同様にnがpngの名前に書いている値に固定されている)<br>
+            x が小さいときは赤(gmp)が早いが n に比べて x がでかくなってくると青(bigint)のほうが早い<br>
+            そりゃそうすぎる。
+
+            (まだ書きかけ)
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="toggle-header">
+            <span class="toggle-icon">˅</span>
+            <span class="toggle-title" style="margin-left: 10px;">1~100までの素数を出すコードゴルフ (外部パッケージなし)</span>
+        </h2>
+        <div class="toggle-content">
+            <span class="lang-tag">julia</span>
+            <div class="code-container"><pre><code class="julia">r=2:99;r[r.∉[r*r&#039;]]</code></pre>
+            </div>
+            まずjuliaでは ; が文の区切りを表せるので、これは r=2:99 と r[r.∉[r*r&#039;]] の2文に分かれる<br>
+            r=2:99 は2から99までの整数の行ベクトル [1,2,3,...,99] (正確には違うが)<br>
+            r[r.∉[r*r&#039;]] だが、まず &#039; というのは adjoint の短縮記法で、 adjoint という関数は<br>
+            随伴行列(や、エルミート転置 共役転置とか言われる)をとる関数。<br>
+            ここでは r に対して r&#039; としているので、 r&#039; が列ベクトルになる (と思ってくれていい)<br>
+            よって r*r&#039; は 2~99 までのかけ算表 (98次正方行列) ができる<br>
+            [r*r&#039;] で「要素に98次正方行列を一つだけ持つ要素数が1の配列」になる。<br>
+            A∉B はAがBに含まれるなら true 、含まれないなら false を返す関数で、<br>
+            r.∉[r*r&#039;] とすることで各 r の要素に対する挙動へと変えている。<br>
+            つまり、 r の各要素 i に対して、 i∉[r*r&#039;] を計算し、その結果をまとめて配列で返している。<br>
+            r.∉r*r&#039; とはできない。これは各 1≤i,j≤98 に対して r[i] != (r*r&#039;)[i,j] の真偽を98次正方行列に入れてる気がする。<br>
+            ( r[3] で行ベクトル r の3列目、 (r*r&#039;)[4,5] で行列 r*r&#039; の4行5列目を指す。)<br>
+            つまりは r.∉[r*r&#039;] は r の各要素について2~98のかけ算表に入っていないかどうかを配列で返す。<br>
+            r[真か偽かの配列] で真の部分だけ残した配列が得られる(便利)ので、これで素数が得られる。<br>
+
+        </div>
+    </div>
 
     <script>
         hljs.highlightAll()
