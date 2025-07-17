@@ -151,8 +151,18 @@ q=e + 2q^4e - q^9 + 2q^16e - q^25
 
 function sigm(q::BigFloat,ll::Int64)::BigFloat
     s = zero(BigFloat)
-    for i in 1:ll
+    d = zero(BigFloat)
+    for i in 1:2
         s += (q^(i&lt;&lt;1))/((1-q^(i&lt;&lt;1))^2)
+    end
+    eps_s = eps(s)
+    for i in 3:ll
+        d = (q^(i&lt;&lt;1))/((1-q^(i&lt;&lt;1))^2)
+        s += d
+        if d &lt;= eps_s
+            #println(&quot;i:&quot;,i)
+            break
+        end
     end
     return s
 end
@@ -172,7 +182,7 @@ function yK(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
 
     q = eps_to_q(eps,ll)
 
-    return (pi/2)*(th3(q,ll))^2
+    return (BigFloat(pi)/2)*(th3(q,ll))^2
 end
 
 function yK_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
@@ -210,10 +220,10 @@ function yE(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
 
     t = th3(q,ll)
 
-    s = sigm(q,1000)
+    s = sigm(q,100000)
 
 
-    return pi*( (1/t^2)*(1/BigFloat(6)-4*s) + t^2*((2-k^2)/BigFloat(6)) )
+    return BigFloat(pi)*( (1/t^2)*(1/BigFloat(6)-4*s) + t^2*((2-k^2)/BigFloat(6)) )
 end
 
 function yE_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
@@ -221,7 +231,7 @@ function yE_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
         return yE(k,ll, is_k_ = true)
     end
 
-    if k &lt;= big&quot;4.5e-154&quot; &amp;&amp; !is_k_
+    if k &lt;= 2*sqrt(eps(BigFloat)) &amp;&amp; !is_k_
         return 1
     end
 
@@ -237,7 +247,7 @@ function yE_(k::BigFloat,ll::Int64;is_k_ = false)::BigFloat
 
     t = th3(q,ll)
 
-    s = sigm(q,1000)
+    s = sigm(q,100000)
 
     lnq = log(q)
 
@@ -251,7 +261,8 @@ end</code></pre>
             コードだけ引き抜いて ::Float64 を ::BigFloat にして任意精度にするのもいいのかもしれません。<br>
             <br>
             参考文献には ln(1/q) と書いているが -ln(q) とした方が精度がちょっと良くなる。<br>
-            ll は反復を何回するか あと途中に sigm(q,1000) とあるが、この 1000 も反復を何回するかなので、
+            ll は反復を何回するか あと途中に sigm(q,100000) とあるが、この 100000 も反復を何回するかで、
+            100000になる前に足す意味がなくなった場合中断している。
             各自で自分の計算にとって適切な値にしてほしい。<br>
             <br>
             yK の最悪精度を調べてみると、各 ll に対して約 ll*4.556+1.09109 桁の精度(10進数で)が得られました
